@@ -1,23 +1,48 @@
-import React,{useState} from "react";
-import { FaGithub,FaPlus } from "react-icons/fa";
-import { Container,Form,SubmitButton } from "./styles";
-
+import React, { useState, useCallback } from "react";
+import { FaGithub, FaPlus } from "react-icons/fa";
+import { Container, Form, SubmitButton } from "./styles";
 
 import api from "../../api";
 
 export default function Main() {
-  const [newRepo,setNewRepo] = useState('');
+  const [newRepo, setNewRepo] = useState("");
+  const [repositorios, setRepositorios] = useState([]);
+  const [loading,setLoading] = useState(false);
 
-  function handleinputChange(e){
+  function handleinputChange(e) {
     setNewRepo(e.target.value);
   }
 
-  function handleSubmit(e){
+
+  /*nao esta sendo utilizado o async await pois estou utilizando os estados abaixo
+  * entao fica bem mais objetivo, rapido e intuitivo usar o useCallback 
+  */
+
+  const handleSubmit = useCallback((e) => {
+
     e.preventDefault();
     
-    const response = api.get(`repos/${newRepo}`);
-    
-  }
+    async function submit() {
+      try{
+      const response = await api.get(`/repos/${newRepo}`); // buscando repos aula-05
+      const data = {
+        name: response.data.full_name
+      };
+
+      setRepositorios([...repositorios, data]);
+      setNewRepo("");
+      console.log(data.name)
+      }catch(error){
+        
+        console.log(error);
+      }finally{
+        setLoading(false);
+      }
+      
+    }
+
+    submit();
+  }, [newRepo,repositorios]);
 
   return (
     <Container>
@@ -28,14 +53,14 @@ export default function Main() {
 
       <Form onSubmit={handleSubmit}>
         <input
-        type="text"
-        placeholder="Enter the creator first and then the repository"
-        value={newRepo}
-        onChange={handleinputChange}
+          type="text"
+          placeholder="Enter the creator first and then the repository"
+          value={newRepo}
+          onChange={handleinputChange}
         />
 
-        <SubmitButton >
-          <FaPlus color="#FFF" size={14}/>
+        <SubmitButton Loading={loading ? 1 : 0 }> 
+          <FaPlus color="#FFF" size={14} />
         </SubmitButton>
       </Form>
     </Container>
