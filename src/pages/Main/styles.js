@@ -21,9 +21,11 @@ export const Container = styled.div`
   }
 `
 
-export const SubmitButton = styled.button.attrs({
-  type: "submit"
-})`
+export const SubmitButton = styled.button.attrs(props=>({
+  type: "submit",
+  disabled: props.loading,
+
+}))`
   background: #431259;
   border: none;
   border-radius: 4px;
@@ -32,6 +34,13 @@ export const SubmitButton = styled.button.attrs({
   display: flex;
   justify-content: center;
   align-items:center;
+
+
+  &[disabled]{
+    cursor:not-allowed;
+    opacity: 0.5;
+    background:red;
+  }
 `
 
 export const Form = styled.form`
