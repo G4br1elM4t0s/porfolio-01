@@ -17,6 +17,10 @@ export default createGlobalStyle`
     background-repeat: no-repeat;
   }
 
+  body{
+    -webkit-font-smoothing: antialiased !important;
+  }
+
   body,input,button{
     color:#222;
     font-size:14px;
