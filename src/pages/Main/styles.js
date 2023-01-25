@@ -69,7 +69,7 @@ export const Form = styled.form`
   flex-direction: row;
   input{
     flex:1;
-    border: 1px solid #DDD;
+    border: 1px solid ${props => (props.error ? 'red' : '#DDD')};
     border-radius: 4px;
     padding: 8px;
     font-size:17px;

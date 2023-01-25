@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { FaGithub, FaPlus, FaSpinner,FaBars,FaTrash } from "react-icons/fa";
 import { Container, Form, SubmitButton,List,DeleteButton } from "./styles";
-
+import { Link } from "react-router-dom";
 
 import api from "../../api";
 
@@ -9,9 +9,29 @@ export default function Main() {
   const [newRepo, setNewRepo] = useState("");
   const [repositorios, setRepositorios] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+  const [alert, setAlert] = useState(null);
+
+ // Buscar
+ useEffect(()=>{
+  const repoStorage = localStorage.getItem('repos');
+  const testeRepo = JSON.parse(repoStorage);
+  if(repoStorage){
+    setRepositorios(testeRepo);
+    console.log(testeRepo);
+  }
+
+}, []);
+
+
+// Salvar alterações
+useEffect(()=>{
+  localStorage.setItem('repos', JSON.stringify(repositorios));
+}, [repositorios]);
+
+
   function handleinputChange(e) {
     setNewRepo(e.target.value);
+    setAlert(null);
   }
 
 /*nao esta sendo utilizado o async await pois estou utilizando os estados abaixo
@@ -21,17 +41,30 @@ export default function Main() {
     (e) => {
       e.preventDefault();
       setLoading(true);
+      setAlert(null);
       async function submit() {
         try {
+
+          if(newRepo ===' '){
+            throw new Error('invalid, input is required');
+          }
+
           const response = await api.get(`/repos/${newRepo}`); // buscando repos aula-05
           const data = {
             name: response.data.full_name,
           };
 
+          const hasRepo = repositorios.find(repo => repo.name === newRepo);
+
+          if(hasRepo){
+            throw new Error('repositories already exists');
+          }
+
           setRepositorios([...repositorios, data]);
           setNewRepo("");
           console.log(data.name);
         } catch (error) {
+          setAlert(true);
           console.log(error);
         } finally {
           setLoading(false);
@@ -46,17 +79,17 @@ export default function Main() {
   const handleDelete = useCallback((repo)=>{
     const find = repositorios.filter(r => r.name !== repo);
     setRepositorios(find);
-  },[repositorios])
+  },[repositorios]);
 
 
   return (
     <Container>
       <h1>
         <FaGithub size={25} />
-        Meus Repositorios
+        My Repositories
       </h1>
 
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmit} error={alert}>
         <input
           type="text"
           placeholder="Enter the creator first and then the repository"
@@ -82,9 +115,9 @@ export default function Main() {
                 </DeleteButton>
                 {repo.name}
                 </span>
-              <a href="#">
+              <Link to={`/repositorio/${encodeURIComponent(repo.name) /*declarando que a url è so um parametro*/ } `}> 
               <FaBars size={20}/>
-              </a>
+              </Link>
             </li>
           ))}
       </List>
